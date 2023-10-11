@@ -8,11 +8,36 @@ namespace MassTransit.KafkaIntegration.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Confluent.SchemaRegistry;
+    using Ductus.FluentDocker.Builders;
+    using Ductus.FluentDocker.Extensions;
+    using Ductus.FluentDocker.Services;
     using RetryPolicies;
 
+
+    public static class KafkaHost
+    {
+        public static readonly ICompositeService _dockerServices;
+        public static readonly IContainerService _brokerContainerService;
+        static KafkaHost()
+        {
+            _dockerServices = new Builder()
+                .UseContainer().UseCompose().FromFile("./docker-compose.yml")
+                .Build()
+                .Start();
+
+            _brokerContainerService = _dockerServices.Containers.First(c => c.Name == "broker");
+            _brokerContainerService.WaitForRunning();
+        }
+
+        public static bool IsRunning()
+        {
+            return _brokerContainerService.State == ServiceRunningState.Running;
+        }
+    }
 
     [SetUpFixture]
     public class KafkaIntegrationTestSetUpFixture
@@ -20,6 +45,7 @@ namespace MassTransit.KafkaIntegration.Tests
         [OneTimeSetUp]
         public async Task Before_any()
         {
+            KafkaHost.IsRunning();
             await CheckBrokerReady();
         }
 

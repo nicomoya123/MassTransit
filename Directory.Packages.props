@@ -17,6 +17,7 @@
     <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.2.0" />
     <PackageVersion Include="coverlet.collector" Version="3.1.2" />
     <PackageVersion Include="dapper.contrib" Version="2.0.78" />
+    <PackageVersion Include="Ductus.FluentDocker" Version="2.10.59" />
     <PackageVersion Include="EntityFramework" Version="6.4.4" />
     <PackageVersion Include="Google.Protobuf" Version="3.23.4" />
     <PackageVersion Include="Grpc.Core" Version="2.46.6" />

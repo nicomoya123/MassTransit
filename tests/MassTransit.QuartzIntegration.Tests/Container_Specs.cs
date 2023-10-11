@@ -239,11 +239,13 @@ namespace MassTransit.QuartzIntegration.Tests
 
                 Initially(
                     When(FirstMessage)
-                    .Schedule(SecondMessageTimeout, ctx =>
-                    {
-                        Console.WriteLine("Schedule SecondMessageTimeout " + ctx.Saga.Timeouts);
-                        return ctx.Init<SecondMessageTimeout>(new { ctx.Saga.CorrelationId });
-                    })
+                    .Schedule(SecondMessageTimeout,
+                        ctx =>
+                        {
+                            Console.WriteLine("Schedule SecondMessageTimeout " + ctx.Saga.Timeouts);
+                            return ctx.Init<SecondMessageTimeout>(new { ctx.Saga.CorrelationId });
+                        },
+                        callback => callback.Delay = TimeSpan.FromMinutes(10))
                     .TransitionTo(PendingSecondMessage));
 
                 During(PendingSecondMessage,
@@ -254,7 +256,8 @@ namespace MassTransit.QuartzIntegration.Tests
                                 {
                                     Console.WriteLine("Schedule SecondMessageTimeout" + ctx.Saga.Timeouts);
                                     return ctx.Init<SecondMessageTimeout>(new { ctx.Saga.CorrelationId });
-                                }
+                                },
+                                    callback => callback.Delay = TimeSpan.FromMinutes(10)
                                 ),
                                 reject => reject.Finalize())
                 );
