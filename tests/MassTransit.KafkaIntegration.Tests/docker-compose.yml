@@ -10,7 +10,9 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_CHECK_INTERVAL: 1000
 
+    tmpfs: "/datalog"
   broker:
     image: confluentinc/cp-server:latest
     hostname: broker

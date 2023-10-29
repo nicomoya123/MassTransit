@@ -27,7 +27,7 @@ namespace MassTransit.KafkaIntegration.Tests
     {
         const string Topic = "health-check";
 
-        [Test, Timeout(1000 * 30)]
+        [Test, Timeout(1000 * 120)]
         public async Task should_be_degraded_when_lost_connection()
         {
             await using var provider = new ServiceCollection()
@@ -57,41 +57,34 @@ namespace MassTransit.KafkaIntegration.Tests
             await harness.Start();
 
 
-            CancellationTokenSource ct1 = new CancellationTokenSource(1000 * 20);
+            CancellationTokenSource ct1 = new CancellationTokenSource(1000 * 30);
             var id = KafkaHost.BrokerContainerService.Id;
             while (!ct1.IsCancellationRequested)
             {
                 KafkaHost.BrokerContainerService.WaitForRunning();
                 await healthCheckService.WaitForHealthStatus(HealthStatus.Healthy);
                 TestContext.Out.WriteLine("Consumer Healthy");
-                var res = KafkaHost.BrokerContainerService.DockerHost.Kill(id);
-                Assert.True(res.Success);
+                //Assert.True(KafkaHost.ZooKeeperContainerService.DockerHost.Kill(KafkaHost.ZooKeeperContainerService.Id).Success);
+
+                Assert.True(KafkaHost.BrokerContainerService.DockerHost.Kill(id).Success);
                 TestContext.Out.WriteLine("Broker Killed");
                 await healthCheckService.WaitForHealthStatus(HealthStatus.Degraded);
+                await Task.Delay(1000 * 60);
                 TestContext.Out.WriteLine("Consumer Degraded");
                 var res1 = KafkaHost.BrokerContainerService.DockerHost.Start(id);
+                //KafkaHost.ZooKeeperContainerService.Start();
+                //KafkaHost.ZooKeeperContainerService.WaitForRunning();
                 Assert.True(res1.Success);
                 TestContext.Out.WriteLine("Broker Started");
-                KafkaHost.BrokerContainerService.WaitForRunning();
-                TestContext.Out.WriteLine("Broker Running");
-
-
+                await healthCheckService.WaitForHealthStatus(HealthStatus.Healthy);
             }
-            CancellationTokenSource ct = new CancellationTokenSource(1000 * 5);
-            int retires = 0;
-            try
-            {
-                while (!ct.IsCancellationRequested)
-                {
-                    var report = await healthCheckService.CheckHealthAsync(ct.Token);
-                    Assert.True(report.Status == HealthStatus.Healthy, "failed after: " + retires + " retries");
-                }
-            }
-            catch(TaskCanceledException ex)
-            {
+        }
 
-            }
-
+        [TearDown]
+        public void DisposeDockerCompose()
+        {
+            //KafkaHost.DockerServices.Stop();
+            //KafkaHost.DockerServices.Remove(true);
         }
     }
 

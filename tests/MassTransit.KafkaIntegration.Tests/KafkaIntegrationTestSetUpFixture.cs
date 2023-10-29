@@ -22,6 +22,7 @@ namespace MassTransit.KafkaIntegration.Tests
     {
         public static readonly ICompositeService DockerServices;
         public static readonly IContainerService BrokerContainerService;
+        public static readonly IContainerService ZooKeeperContainerService;
         static KafkaHost()
         {
             DockerServices = new Builder()
@@ -30,6 +31,7 @@ namespace MassTransit.KafkaIntegration.Tests
                 .Start();
 
             BrokerContainerService = DockerServices.Containers.First(c => c.Name == "broker");
+            ZooKeeperContainerService = DockerServices.Containers.First(c => c.Name == "zookeeper");
             BrokerContainerService.WaitForRunning();
         }
 
