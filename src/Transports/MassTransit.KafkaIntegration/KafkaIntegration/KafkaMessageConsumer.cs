@@ -115,7 +115,6 @@
 
             EnabledLogger? logger = error.IsFatal ? LogContext.Error : LogContext.Warning;
             logger?.Log("Consumer [{MemberId}] error ({Code}): {Reason} on {Topic}", consumer.MemberId, error.Code, error.Reason, _receiveSettings.Topic);
-
             if (error.IsLocalError)
                 _cancellationTokenSource.Cancel();
         }

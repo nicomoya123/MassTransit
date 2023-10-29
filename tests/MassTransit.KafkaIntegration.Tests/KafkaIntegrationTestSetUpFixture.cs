@@ -20,22 +20,22 @@ namespace MassTransit.KafkaIntegration.Tests
 
     public static class KafkaHost
     {
-        public static readonly ICompositeService _dockerServices;
-        public static readonly IContainerService _brokerContainerService;
+        public static readonly ICompositeService DockerServices;
+        public static readonly IContainerService BrokerContainerService;
         static KafkaHost()
         {
-            _dockerServices = new Builder()
+            DockerServices = new Builder()
                 .UseContainer().UseCompose().FromFile("./docker-compose.yml")
                 .Build()
                 .Start();
 
-            _brokerContainerService = _dockerServices.Containers.First(c => c.Name == "broker");
-            _brokerContainerService.WaitForRunning();
+            BrokerContainerService = DockerServices.Containers.First(c => c.Name == "broker");
+            BrokerContainerService.WaitForRunning();
         }
 
         public static bool IsRunning()
         {
-            return _brokerContainerService.State == ServiceRunningState.Running;
+            return BrokerContainerService.State == ServiceRunningState.Running;
         }
     }
 
